@@ -9,7 +9,7 @@ OBJS := $(patsubst $(SRC_DIR)/%.c,$(BIN_DIR)/%.o,$(SRCS))
 CC := gcc
 CFLAGS := -Wall -Wextra
 
-LDFLAGS := -lSDL2
+LDFLAGS := -lSDL2 -lSDL2_image
 
 LOGGER = @echo "[$(notdir $<)]"
 

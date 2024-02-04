@@ -2,6 +2,7 @@
 #define __GUI_H__
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <stdbool.h>
 
 #define TARGET_FPS 60
