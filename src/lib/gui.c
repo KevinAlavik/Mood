@@ -1,4 +1,3 @@
-
 #include "gui.h"
 #include "logger.h"
 #include <stdlib.h>
@@ -26,7 +25,9 @@ window_t spawn_window(window_config_t* config) {
 
     DEBUG_LOG("SDL initialized successfully");
 
-    SDL_Window* sdl_window = SDL_CreateWindow(
+    window_t window;
+
+    window.sdl_window = SDL_CreateWindow(
         config->title,
         config->x,
         config->y,
@@ -34,36 +35,26 @@ window_t spawn_window(window_config_t* config) {
         config->height,
         SDL_WINDOW_SHOWN
     );
-
-    if (sdl_window == NULL) {
+    if (window.sdl_window == NULL) {
         mood_log(stderr, "Error", "SDL window creation failed: %s", SDL_GetError());
         exit(EXIT_FAILURE);
     }
-
     DEBUG_LOG("SDL window created successfully");
 
-    window_t* window = (window_t*)malloc(sizeof(window_t));
-    if (window == NULL) {
-        mood_log(stderr, "Error", "Memory allocation for window_t failed");
-        exit(EXIT_FAILURE);
-    }
-
-    DEBUG_LOG("Memory allocated for window_t");
-
-    window->config = config;
-    window->sdl_window = sdl_window;
-    window->alive = true;
+    window.config = config;
+    window.alive = true;
 
     DEBUG_LOG("Window spawned successfully");
 
-    return *window;
+    return window;
 }
 
 int destroy_window(window_t* window) {
-    SDL_DestroyWindow(window->sdl_window);
-    SDL_Quit();
+    if (window->sdl_window != NULL) {
+        SDL_DestroyWindow(window->sdl_window);
+    }
 
-    free(window);
+    SDL_Quit();
 
     DEBUG_LOG("Window destroyed and SDL quit successfully");
 
