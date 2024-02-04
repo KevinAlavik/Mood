@@ -2,13 +2,21 @@
 #include "lib/logger.h"
 #include <signal.h>
 
-#define TARGET_FPS 60
-
 void handle_signal(int signal) {
     if (signal == SIGINT) {
         mood_log(stdout, "Mood Event", "User terminated app. Exiting...");
         exit(EXIT_SUCCESS);
     }
+}
+
+void window_setup(window_t* window) {
+    window_event_t background_black = {
+        .code = 0,
+        .args = (int[]){0, 0, 0},
+        .num_args = 3
+    };
+
+    update_window(window, &background_black);
 }
 
 int main() {
@@ -24,31 +32,10 @@ int main() {
 
     window_t window = spawn_window(&window_config);
 
-    window_event_t set_background_color_event = {
-        .code = 0,
-        .args = (int[]){255, 255, 255},
-        .num_args = 3
-    };
+    window_setup(&window);
 
-    SDL_Event sdl_event;
-    
     while (window.alive) {
-        int start_time = SDL_GetTicks();
-
-        update_window(&window, &set_background_color_event);
-
-        while (SDL_PollEvent(&sdl_event)) {
-            if (sdl_event.type == SDL_QUIT) {
-                window.alive = 0;
-            }
-        }
-
-        int elapsed_time = SDL_GetTicks() - start_time;
-        int frame_delay = 1000 / TARGET_FPS;
-
-        if (elapsed_time < frame_delay) {
-            SDL_Delay(frame_delay - elapsed_time);
-        }
+        window_handler(&window);
     }
 
     destroy_window(&window);

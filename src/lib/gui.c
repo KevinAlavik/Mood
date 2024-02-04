@@ -1,19 +1,13 @@
-
+// gui.c
 #include "gui.h"
 #include "logger.h"
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifdef DEBUG_LOGGING
-#define DEBUG_LOG(...) mood_log(stdout, "Mood Debug", __VA_ARGS__)
-#else
-#define DEBUG_LOG(...) ((void)0)
-#endif
-
-void set_background_color(SDL_Window* window, int r, int g, int b) {
-    SDL_SetRenderDrawColor(SDL_GetRenderer(window), r, g, b, 255);
-    SDL_RenderClear(SDL_GetRenderer(window));
-    SDL_RenderPresent(SDL_GetRenderer(window));
+void set_background_color(window_t* window, int r, int g, int b) {
+    SDL_SetRenderDrawColor(window->renderer, r, g, b, 255);
+    SDL_RenderClear(window->renderer);
+    SDL_RenderPresent(window->renderer);
 
     DEBUG_LOG("Background color set to (%d, %d, %d)", r, g, b);
 }
@@ -42,6 +36,14 @@ window_t spawn_window(window_config_t* config) {
 
     DEBUG_LOG("SDL window created successfully");
 
+    SDL_Renderer* renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED);
+    if (renderer == NULL) {
+        mood_log(stderr, "Error", "SDL renderer creation failed: %s", SDL_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+    DEBUG_LOG("SDL renderer created successfully");
+
     window_t* window = (window_t*)malloc(sizeof(window_t));
     if (window == NULL) {
         mood_log(stderr, "Error", "Memory allocation for window_t failed");
@@ -52,6 +54,7 @@ window_t spawn_window(window_config_t* config) {
 
     window->config = config;
     window->sdl_window = sdl_window;
+    window->renderer = renderer;
     window->alive = true;
 
     DEBUG_LOG("Window spawned successfully");
@@ -60,6 +63,7 @@ window_t spawn_window(window_config_t* config) {
 }
 
 int destroy_window(window_t* window) {
+    SDL_DestroyRenderer(window->renderer);
     SDL_DestroyWindow(window->sdl_window);
     SDL_Quit();
 
@@ -70,6 +74,7 @@ int destroy_window(window_t* window) {
     return 0;
 }
 
+
 void update_window(window_t* window, window_event_t* event) {
     switch(event->code) {
         case 0:
@@ -79,7 +84,7 @@ void update_window(window_t* window, window_event_t* event) {
                 int g = event->args[1];
                 int b = event->args[2];
                 
-                set_background_color(window->sdl_window, r, g, b);
+                set_background_color(window, r, g, b); 
             } else {
                 mood_log(stderr, "Error", "Event does not have 3 arguments. set_background_color needs 3 args");
             }
@@ -88,5 +93,23 @@ void update_window(window_t* window, window_event_t* event) {
         default:
             mood_log(stderr, "Error", "Unsupported event code: %d", event->code);
             break;
+    }
+}
+
+void window_handler(window_t* window) {
+    SDL_Event sdl_event;
+    int start_time = SDL_GetTicks();
+
+    while (SDL_PollEvent(&sdl_event)) {
+        if (sdl_event.type == SDL_QUIT) {
+            window->alive = 0;
+        }
+    }
+
+    int elapsed_time = SDL_GetTicks() - start_time;
+    int frame_delay = 1000 / TARGET_FPS;
+
+    if (elapsed_time < frame_delay) {
+        SDL_Delay(frame_delay - elapsed_time);
     }
 }
