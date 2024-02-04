@@ -9,11 +9,14 @@ OBJS := $(patsubst $(SRC_DIR)/%.c,$(BIN_DIR)/%.o,$(SRCS))
 CC := gcc
 CFLAGS := -Wall -Wextra
 
-LDFLAGS := -lSDL2
+LDFLAGS := -lSDL2 -lSDL2_image
 
 LOGGER = @echo "[$(notdir $<)]"
 
 all: $(BIN_DIR)/$(EXEC_NAME)
+
+debug: CFLAGS += -DDEBUG_LOGGING
+debug: $(BIN_DIR)/$(EXEC_NAME)
 
 $(BIN_DIR)/$(EXEC_NAME): $(OBJS)
 	$(LOGGER) Linking...
@@ -33,7 +36,7 @@ start:
 clean:
 	rm -rf $(BIN_DIR)
 
-.PHONY: all start clean install
+.PHONY: all debug start clean install
 
 install:
 	@sudo ln -fs $(shell realpath $(BIN_DIR)/$(EXEC_NAME)) /usr/local/bin/$(EXEC_NAME)

@@ -2,13 +2,44 @@
 #include "lib/logger.h"
 #include <signal.h>
 
-#define TARGET_FPS 60
-
 void handle_signal(int signal) {
     if (signal == SIGINT) {
         mood_log(stdout, "Mood Event", "User terminated app. Exiting...");
         exit(EXIT_SUCCESS);
     }
+}
+
+void window_setup(window_t* window) {
+    window_event_t background_black = {
+        .code = 0,
+        .args = NULL,
+        .num_args = 3
+    };
+
+    window_event_t doge_sprite = {
+        .code = 1,
+        .args = NULL, 
+        .num_args = 3
+    };
+
+    background_black.args = (int*)malloc(sizeof(int) * background_black.num_args);
+    doge_sprite.args = (int*)malloc(sizeof(int) * doge_sprite.num_args);
+
+    if (background_black.args == NULL || doge_sprite.args == NULL) {
+        mood_log(stderr, "Error", "Memory allocation for event arguments failed");
+        exit(EXIT_FAILURE);
+    }
+
+    background_black.args[0] = 0;
+    background_black.args[1] = 0;
+    background_black.args[2] = 0;
+
+    doge_sprite.args[0] = (int)strdup("./assets/doge.jpg");
+    doge_sprite.args[1] = 0;
+    doge_sprite.args[2] = 0;
+
+    update_window(window, &background_black);
+    update_window(window, &doge_sprite);
 }
 
 int main() {
@@ -24,31 +55,10 @@ int main() {
 
     window_t window = spawn_window(&window_config);
 
-    window_event_t set_background_color_event = {
-        .code = 0,
-        .args = (int[]){255, 255, 255},
-        .num_args = 3
-    };
+    window_setup(&window);
 
-    SDL_Event sdl_event;
-    
     while (window.alive) {
-        int start_time = SDL_GetTicks();
-
-        update_window(&window, &set_background_color_event);
-
-        while (SDL_PollEvent(&sdl_event)) {
-            if (sdl_event.type == SDL_QUIT) {
-                window.alive = 0;
-            }
-        }
-
-        int elapsed_time = SDL_GetTicks() - start_time;
-        int frame_delay = 1000 / TARGET_FPS;
-
-        if (elapsed_time < frame_delay) {
-            SDL_Delay(frame_delay - elapsed_time);
-        }
+        window_handler(&window);
     }
 
     destroy_window(&window);
