@@ -1,3 +1,5 @@
+TARGET_FPS = -1 # -1 for unlimited
+
 SRC_DIR := src
 BIN_DIR := bin
 
@@ -7,7 +9,7 @@ SRCS := $(shell find $(SRC_DIR) -type f -name '*.c')
 OBJS := $(patsubst $(SRC_DIR)/%.c,$(BIN_DIR)/%.o,$(SRCS))
 
 CC := gcc
-CFLAGS := -Wall -Wextra
+CFLAGS := -Wall -Wextra -DTARGET_FPS=$(TARGET_FPS)
 
 LDFLAGS := -lSDL2 -lSDL2_image
 

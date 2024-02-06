@@ -5,7 +5,6 @@
 #include <SDL2/SDL_image.h>
 #include <stdbool.h>
 
-#define TARGET_FPS 60
 #define NULL_INT -1
 
 typedef struct {

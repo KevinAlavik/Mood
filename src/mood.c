@@ -14,11 +14,14 @@ void handle_signal(int signal) {
 
 void window_setup(window_t* window) {
     set_background_color(window, 0, 0, 0);
-    draw_sprite(window, "./assets/doge.jpg", window->centerX, window->centerY, NULL_INT, NULL_INT);
 }
 
-int main() {
+int main(int argc, char** argv) {
     signal(SIGINT, handle_signal);
+    if(argc != 2) {
+        mood_log(stderr, "Mood Error", "Expected: %s <image path>", argv[0]);
+        exit(1);
+    }
 
     window_config_t window_config = {
         .width = 800,
@@ -34,6 +37,11 @@ int main() {
     window_setup(&window);
 
     while (window.alive) {
+        draw_sprite(&window, argv[1], window.centerX, window.centerY, NULL_INT, NULL_INT);
+        float fps = get_current_fps();
+        char newTitle[100];
+        snprintf(newTitle, sizeof(newTitle), "%s [FPS: %.2f]", window_config.title, fps);
+        change_window_title(&window, newTitle);
         window_handle_fps_and_quit(&window);
     }
 
