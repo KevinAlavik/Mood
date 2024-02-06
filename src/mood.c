@@ -1,5 +1,8 @@
 #include "lib/gui.h"
 #include "lib/logger.h"
+#include "lib/textures.h"
+#include "lib/window_controll.h"
+#include "lib/scenes.h"
 #include <signal.h>
 
 void handle_signal(int signal) {
@@ -10,36 +13,8 @@ void handle_signal(int signal) {
 }
 
 void window_setup(window_t* window) {
-    window_event_t background_black = {
-        .code = 0,
-        .args = NULL,
-        .num_args = 3
-    };
-
-    window_event_t doge_sprite = {
-        .code = 1,
-        .args = NULL, 
-        .num_args = 3
-    };
-
-    background_black.args = (int*)malloc(sizeof(int) * background_black.num_args);
-    doge_sprite.args = (int*)malloc(sizeof(int) * doge_sprite.num_args);
-
-    if (background_black.args == NULL || doge_sprite.args == NULL) {
-        mood_log(stderr, "Error", "Memory allocation for event arguments failed");
-        exit(EXIT_FAILURE);
-    }
-
-    background_black.args[0] = 0;
-    background_black.args[1] = 0;
-    background_black.args[2] = 0;
-
-    doge_sprite.args[0] = (int)strdup("./assets/doge.jpg");
-    doge_sprite.args[1] = 0;
-    doge_sprite.args[2] = 0;
-
-    update_window(window, &background_black);
-    update_window(window, &doge_sprite);
+    set_background_color(window, 0, 0, 0);
+    draw_sprite(window, "./assets/doge.jpg", window->centerX, window->centerY, NULL_INT, NULL_INT);
 }
 
 int main() {
@@ -50,6 +25,7 @@ int main() {
         .height = 600,
         .x = SDL_WINDOWPOS_CENTERED,
         .y = SDL_WINDOWPOS_CENTERED,
+        .shouldDrawFromCenter = true,
         .title = "Mood - Example"
     };
 
@@ -58,7 +34,7 @@ int main() {
     window_setup(&window);
 
     while (window.alive) {
-        window_handler(&window);
+        window_handle_fps_and_quit(&window);
     }
 
     destroy_window(&window);
