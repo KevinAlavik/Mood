@@ -33,6 +33,6 @@ typedef struct {
 
 window_t spawn_window(window_config_t* config);
 int destroy_window(window_t* window);
-void window_handle_fps_and_quit(window_t* window);
+void handle_window_signals(window_t* window);
 
 #endif // __GUI_H__

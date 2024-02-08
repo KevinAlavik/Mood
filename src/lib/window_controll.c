@@ -1,13 +1,11 @@
 #include "window_controll.h"
-#include "logger.h"
 #include "textures.h"
+#include "logger.h"
 
 void set_background_color(window_t* window, int r, int g, int b) {
     SDL_SetRenderDrawColor(window->renderer, r, g, b, 255);
     SDL_RenderClear(window->renderer);
     SDL_RenderPresent(window->renderer);
-
-    DEBUG_LOG("Background color set to (%d, %d, %d)", r, g, b);
 }
 
 void draw_sprite(window_t* window, const char* imagePath, int x, int y, int width, int height) {
@@ -29,19 +27,67 @@ void draw_sprite(window_t* window, const char* imagePath, int x, int y, int widt
     }
 
     if (shouldDrawFromCenter) {
-        DEBUG_LOG("Drawing sprite from center.");
         destRect.x = x - destRect.w / 2;
         destRect.y = y - destRect.h / 2;
-        DEBUG_LOG("Since we are drawing from center x: %d y: %d", destRect.x, destRect.y);
     } else {
-        DEBUG_LOG("Drawing sprite from top left corner.");
         destRect.x = x;
         destRect.y = y;
     }
 
     SDL_RenderCopy(window->renderer, sprite, NULL, &destRect);
     SDL_DestroyTexture(sprite);
-    DEBUG_LOG("Drew sprite at %d, %d with width %d and height %d (%s)", destRect.x, destRect.y, destRect.w, destRect.h, imagePath);
+}
+
+void draw_pixel(window_t* window, int x, int y, Uint8 r, Uint8 g, Uint8 b) {
+    SDL_SetRenderDrawColor(window->renderer, r, g, b, 255);
+    SDL_RenderDrawPoint(window->renderer, x, y);
+}
+
+void draw_circle(window_t* window, int x, int y, int radius, Uint8 r, Uint8 g, Uint8 b) {
+    int cx = radius;
+    int cy = 0;
+    int radiusError = 1 - cx;
+
+    while (cx >= cy) {
+        draw_pixel(window, cx + x, cy + y, r, g, b);
+        draw_pixel(window, cy + x, cx + y, r, g, b);
+        draw_pixel(window, -cx + x, cy + y, r, g, b);
+        draw_pixel(window, -cy + x, cx + y, r, g, b);
+        draw_pixel(window, -cx + x, -cy + y, r, g, b);
+        draw_pixel(window, -cy + x, -cx + y, r, g, b);
+        draw_pixel(window, cx + x, -cy + y, r, g, b);
+        draw_pixel(window, cy + x, -cx + y, r, g, b);
+
+        cy++;
+        if (radiusError < 0) {
+            radiusError += 2 * cy + 1;
+        } else {
+            cx--;
+            radiusError += 2 * (cy - cx + 1);
+        }
+    }
+}
+
+void draw_rectangle(window_t* window, int x, int y, int width, int height, Uint8 r, Uint8 g, Uint8 b) {
+    SDL_Rect rect = { x, y, width, height };
+    SDL_SetRenderDrawColor(window->renderer, r, g, b, 255);
+    SDL_RenderDrawRect(window->renderer, &rect);
+}
+
+void draw_triangle(window_t* window, int x1, int y1, int x2, int y2, int x3, int y3, Uint8 r, Uint8 g, Uint8 b) {
+    SDL_SetRenderDrawColor(window->renderer, r, g, b, 255);
+    SDL_RenderDrawLine(window->renderer, x1, y1, x2, y2);
+    SDL_RenderDrawLine(window->renderer, x2, y2, x3, y3);
+    SDL_RenderDrawLine(window->renderer, x3, y3, x1, y1);
+}
+
+void draw_custom_shape(window_t* window, shape_t shape, Uint8 r, Uint8 g, Uint8 b) {
+    SDL_SetRenderDrawColor(window->renderer, r, g, b, 255);
+    for (int i = 0; i < shape.num_points - 1; i++) {
+        SDL_RenderDrawLine(window->renderer, shape.points[i].x, shape.points[i].y, shape.points[i + 1].x, shape.points[i + 1].y);
+    }
+    
+    SDL_RenderDrawLine(window->renderer, shape.points[shape.num_points - 1].x, shape.points[shape.num_points - 1].y, shape.points[0].x, shape.points[0].y);
 }
 
 float get_current_fps() {

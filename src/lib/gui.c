@@ -90,7 +90,7 @@ int destroy_window(window_t* window) {
     return 0;
 }
 
-void window_handle_fps_and_quit(window_t* window) {
+void handle_window_signals(window_t* window) {
     SDL_RenderPresent(window->renderer);
     SDL_Event sdl_event;
     int start_time = SDL_GetTicks();

@@ -1,4 +1,4 @@
-TARGET_FPS = -1 # -1 for unlimited
+TARGET_FPS = 120 # -1 for unlimited
 
 SRC_DIR := src
 BIN_DIR := bin
